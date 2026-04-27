@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Local Storage</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-panel: #1e293b;
+            --bg-hover: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .title i {
+            color: #60a5fa;
+            -webkit-text-fill-color: initial;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            background: var(--bg-panel);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .breadcrumbs {
+            flex-grow: 1;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: monospace;
+            background: var(--bg-dark);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .btn {
+            background: var(--bg-hover);
+            color: var(--text-main);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #475569;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .file-list {
+            background: var(--bg-panel);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            flex-grow: 1;
+        }
+
+        .file-icon {
+            font-size: 1.5rem;
+        }
+
+        .folder-icon {
+            color: #fbbf24;
+        }
+
+        .file-icon-doc {
+            color: #60a5fa;
+        }
+
+        .file-name {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .file-item:hover .file-actions {
+            opacity: 1;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0.4rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
+            color: var(--text-main);
+            background: var(--bg-dark);
+        }
+
+        .icon-btn.delete:hover {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .icon-btn.edit:hover {
+            color: var(--accent);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal {
+            background: var(--bg-panel);
+            padding: 2rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+
+        .modal-title {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            color: var(--text-main);
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .input-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', monospace;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .input-control:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        textarea.input-control {
+            resize: vertical;
+            min-height: 150px;
+            font-family: monospace;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            opacity: 0.5;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            flex-direction: column;
+            gap: 1.5rem;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-main);
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">
+                <i class="ph-fill ph-hard-drives"></i>
+                Eszuri Storage
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <button class="icon-btn" onclick="goUp()" id="upBtn" title="Go Up"
+                style="display: none; background: var(--bg-dark); border: 1px solid var(--border);">
+                <i class="ph ph-arrow-u-up-left"></i>
+            </button>
+            <div class="breadcrumbs" id="breadcrumbs">/</div>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i class="ph ph-plus-circle"></i> New File
+            </button>
+        </div>
+
+        <div class="file-list" id="files">
+            <!-- Files will be injected here -->
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Processing...</div>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3 class="modal-title" id="modalTitle">Create New File</h3>
+            <div class="input-group">
+                <label>File Name</label>
+                <input type="text" id="fileNameInput" class="input-control" placeholder="example.txt">
+            </div>
+            <div class="input-group">
+                <label>Content</label>
+                <textarea id="fileContentInput" class="input-control"
+                    placeholder="Write something awesome..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" id="saveBtn" onclick="saveFile()">Save File</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = window.location.origin;
+        let currentPath = "";
+        let isEditing = false;
+
+        const loadingOverlay = document.getElementById("loadingOverlay");
+
+        function showLoading(text = "Processing...") {
+            document.querySelector(".loading-text").innerText = text;
+            loadingOverlay.classList.add("show");
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.remove("show");
+        }
+
+        async function loadFiles() {
+            showLoading("Fetching Files...");
+            try {
+                const res = await fetch(`${API}/api/files?path=${encodeURIComponent(currentPath)}`);
+                if (!res.ok) throw new Error("Failed to fetch files");
+                const files = await res.json();
+
+                const list = document.getElementById("files");
+                list.innerHTML = "";
+
+                // Update Breadcrumbs
+                const breadcrumbsEl = document.getElementById("breadcrumbs");
+                breadcrumbsEl.innerText = "/" + currentPath;
+
+                // Toggle Up Button
+                const upBtn = document.getElementById("upBtn");
+                upBtn.style.display = currentPath ? "flex" : "none";
+
+                if (files.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <i class="ph ph-folder-open"></i>
+                            <div>This folder is empty</div>
+                        </div>`;
+                    return;
+                }
+
+                // Sort: Folders first, then files alphabetically
+                files.sort((a, b) => {
+                    if (a.isDirectory === b.isDirectory) return a.name.localeCompare(b.name);
+                    return a.isDirectory ? -1 : 1;
+                });
+
+                files.forEach(f => {
+                    const item = document.createElement("div");
+                    item.className = "file-item";
+
+                    const iconClass = f.isDirectory ? "ph-fill ph-folder folder-icon" : "ph-fill ph-file-text file-icon-doc";
+                    
+                    const fileInfo = document.createElement("div");
+                    fileInfo.className = "file-info";
+                    fileInfo.innerHTML = `
+                        <i class="${iconClass} file-icon"></i>
+                        <span class="file-name">${f.name}</span>
+                    `;
+                    fileInfo.onclick = () => handleItemClick(f.name, f.isDirectory);
+
+                    const fileActions = document.createElement("div");
+                    fileActions.className = "file-actions";
+                    
+                    if (!f.isDirectory) {
+                        const editBtn = document.createElement("button");
+                        editBtn.className = "icon-btn edit";
+                        editBtn.innerHTML = '<i class="ph ph-pencil-simple"></i>';
+                        editBtn.title = "Edit File";
+                        editBtn.onclick = () => openEditModal(f.name);
+                        fileActions.appendChild(editBtn);
+                    }
+
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.className = "icon-btn delete";
+                    deleteBtn.innerHTML = '<i class="ph ph-trash"></i>';
+                    deleteBtn.title = `Delete ${f.isDirectory ? 'Folder' : 'File'}`;
+                    deleteBtn.onclick = () => deleteItem(f.name, f.isDirectory);
+                    fileActions.appendChild(deleteBtn);
+
+                    item.appendChild(fileInfo);
+                    item.appendChild(fileActions);
+                    list.appendChild(item);
+                });
+            } catch (error) {
+                console.error("Error loading files:", error);
+                alert("Failed to connect to server. Check localtunnel connection.");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function handleItemClick(name, isDirectory) {
+            if (isDirectory) {
+                currentPath = currentPath ? `${currentPath}/${name}` : name;
+                loadFiles();
+            } else {
+                const targetPath = currentPath ? `${currentPath}/${name}` : name;
+                window.open(`${API}/api/download?path=${encodeURIComponent(targetPath)}`);
+            }
+        }
+
+        function goUp() {
+            if (!currentPath) return;
+            const parts = currentPath.split("/");
+            parts.pop();
+            currentPath = parts.join("/");
+            loadFiles();
+        }
+
+        // --- Modal Logic ---
+        const modalOverlay = document.getElementById("modalOverlay");
+        const modalTitle = document.getElementById("modalTitle");
+        const fileNameInput = document.getElementById("fileNameInput");
+        const fileContentInput = document.getElementById("fileContentInput");
+
+        function openCreateModal() {
+            isEditing = false;
+            modalTitle.innerText = "Create New File";
+            fileNameInput.value = "";
+            fileContentInput.value = "";
+            fileNameInput.disabled = false;
+            fileNameInput.style.opacity = "1";
+
+            modalOverlay.style.display = "flex";
+            // trigger reflow for transition
+            setTimeout(() => modalOverlay.classList.add("show"), 10);
+            setTimeout(() => fileNameInput.focus(), 100);
+        }
+
+        async function openEditModal(name) {
+            showLoading("Reading File...");
+            try {
+                const targetPath = currentPath ? `${currentPath}/${name}` : name;
+                const res = await fetch(`${API}/api/download?path=${encodeURIComponent(targetPath)}`);
+                if (!res.ok) throw new Error("Could not download file");
+
+                const content = await res.text();
+
+                isEditing = true;
+                modalTitle.innerText = "Edit File";
+                fileNameInput.value = name;
+                fileNameInput.disabled = true; // Protect filename during edit
+                fileNameInput.style.opacity = "0.6";
+                fileContentInput.value = content;
+
+                modalOverlay.style.display = "flex";
+                setTimeout(() => modalOverlay.classList.add("show"), 10);
+            } catch (err) {
+                alert("Failed to read file content");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove("show");
+            setTimeout(() => {
+                modalOverlay.style.display = "none";
+            }, 300); // match transition time
+        }
+
+        async function saveFile() {
+            const name = fileNameInput.value.trim();
+            const content = fileContentInput.value;
+
+            if (!name) {
+                fileNameInput.focus();
+                return;
+            }
+
+            const method = isEditing ? "PUT" : "POST";
+
+            showLoading("Saving Changes...");
+            try {
+                const res = await fetch(`${API}/api/file`, {
+                    method: method,
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({name, content, currentPath})
+                });
+
+                if (res.ok) {
+                    closeModal();
+                    loadFiles(); 
+                } else {
+                    const text = await res.text();
+                    alert("Failed to save file: " + text);
+                }
+            } catch (err) {
+                alert("Error saving file");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function deleteItem(name, isDirectory) {
+            const type = isDirectory ? "folder" : "file";
+            if (!confirm(`Are you sure you want to delete this ${type}: "${name}"?\nThis action cannot be undone.`)) return;
+
+            showLoading(`Deleting ${type}...`);
+            try {
+                const res = await fetch(`${API}/api/file`, {
+                    method: "DELETE",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({name, currentPath})
+                });
+
+                if (res.ok) {
+                    loadFiles();
+                } else {
+                    alert("Failed to delete item");
+                }
+            } catch (err) {
+                alert("Error deleting item");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Init
+        loadFiles();
+    </script>
+</body>
+
+</html>
