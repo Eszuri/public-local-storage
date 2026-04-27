@@ -1,0 +1,8 @@
+download binary:
+https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe
+
+or :
+winget install --id Cloudflare.cloudflared
+
+how run:
+runtime/windows/cloudflared-windows-amd64.exe tunnel --url http://localhost:3000
