@@ -11,10 +11,10 @@ A premium, high-performance local file management system with a modern web inter
 
 -   **✨ Modern UI**: Sleek, dark-themed interface with glassmorphism effects and Phosphor icons.
 -   **📂 Full CRUD Operations**: Create, Read, Update, and Delete files and folders directly from your browser.
--   **⏳ Smart Loading**: Integrated loading overlays with blurred backgrounds to maintain UI integrity during slow connections (e.g., Localtunnel/Ngrok).
+-   **⏳ Smart Loading**: Integrated loading overlays with blurred backgrounds to maintain UI integrity during slow connections.
 -   **🔒 Secure by Design**: Built-in protection against Path Traversal attacks to keep your system safe.
 -   **⚡ High Performance**: Powered by asynchronous I/O and `tsup` for lightning-fast bundling and execution.
--   **🌍 Public Ready**: Pre-configured scripts for Localtunnel integration.
+-   **🌍 Public Ready**: Pre-configured scripts for Bore tunnel integration.
 
 ## 🛠 Tech Stack
 
@@ -49,7 +49,6 @@ A premium, high-performance local file management system with a modern web inter
 | `npm run online` | Dev server + **Bore tunnel** (public access on port 4000). |
 | `npm run build` | Bundle the project for **Production** (Minified & Optimized). |
 | `npm start` | Run the compiled production bundle. |
-| `npm run public` | Expose your local storage to the **Public Web** via Localtunnel. |
 | `npm run typecheck` | Validate TypeScript integrity. |
 
 ## 🚀 Cara Menjalankan (How to Run)
@@ -69,13 +68,7 @@ Anda dapat menjalankan server secara lokal atau mengeksposnya ke publik.
     ```
     *Server lokal + tunnel publik otomatis via Bore (port 4000).*
 
-3.  **Server Publik (Localtunnel)**:
-    ```bash
-    npm run public
-    ```
-    *Metode ini akan memberikan URL publik otomatis.*
-
-4.  **Manual (Production Mode)**:
+3.  **Manual (Production Mode)**:
     ```bash
     npm run build
     npm start
@@ -84,13 +77,14 @@ Anda dapat menjalankan server secara lokal atau mengeksposnya ke publik.
 ---
 
 ### 📱 Di Android (via Termux)
-Anda bisa menjadikan smartphone Anda sebagai server file storage yang bisa diakses dari mana saja menggunakan **Cloudflared**.
+Anda bisa menjadikan smartphone Anda sebagai server file storage yang bisa diakses dari mana saja menggunakan **Bore**.
 
 1.  **Persiapan Termux**:
     Buka Termux dan instal dependensi yang diperlukan:
     ```bash
     pkg update && pkg upgrade
-    pkg install nodejs git cloudflared
+    pkg install nodejs git
+    cargo install bore-cli
     ```
 
 2.  **Jalankan Aplikasi**:
@@ -98,15 +92,9 @@ Anda bisa menjadikan smartphone Anda sebagai server file storage yang bisa diaks
     git clone <url-repo-anda>
     cd project-name
     npm install
-    npm run dev
+    npm run online
     ```
-
-3.  **Aktifkan Tunnel (Public Access)**:
-    Buka session baru di Termux (swipe kiri > New Session) dan jalankan:
-    ```bash
-    cloudflared tunnel --url http://localhost:4000
-    ```
-    *Cloudflared akan memberikan URL `.trycloudflare.com` yang bisa diakses secara global.*
+    *Bore akan memberikan URL publik yang bisa diakses secara global.*
 
 ---
 
