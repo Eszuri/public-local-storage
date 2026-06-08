@@ -38,7 +38,7 @@ A premium, high-performance local file management system with a modern web inter
     Create a `.env` file in the root directory:
     ```env
     STORAGE_PATH=D:\MyFiles  # Path to manage
-    PORT=3000
+    PORT=4000
     ```
 
 ## 📜 Available Scripts
@@ -46,6 +46,7 @@ A premium, high-performance local file management system with a modern web inter
 | Command | Action |
 | :--- | :--- |
 | `npm run dev` | Launch development server with **Hot Reload**. |
+| `npm run online` | Dev server + **Bore tunnel** (public access on port 4000). |
 | `npm run build` | Bundle the project for **Production** (Minified & Optimized). |
 | `npm start` | Run the compiled production bundle. |
 | `npm run public` | Expose your local storage to the **Public Web** via Localtunnel. |
@@ -60,15 +61,21 @@ Anda dapat menjalankan server secara lokal atau mengeksposnya ke publik.
     ```bash
     npm run dev
     ```
-    Akses di: `http://localhost:3000`
+    Akses di: `http://localhost:4000`
 
-2.  **Server Publik (Localtunnel)**:
+2.  **Server Publik (Bore Tunnel)**:
+    ```bash
+    npm run online
+    ```
+    *Server lokal + tunnel publik otomatis via Bore (port 4000).*
+
+3.  **Server Publik (Localtunnel)**:
     ```bash
     npm run public
     ```
     *Metode ini akan memberikan URL publik otomatis.*
 
-3.  **Manual (Production Mode)**:
+4.  **Manual (Production Mode)**:
     ```bash
     npm run build
     npm start
@@ -97,7 +104,7 @@ Anda bisa menjadikan smartphone Anda sebagai server file storage yang bisa diaks
 3.  **Aktifkan Tunnel (Public Access)**:
     Buka session baru di Termux (swipe kiri > New Session) dan jalankan:
     ```bash
-    cloudflared tunnel --url http://localhost:3000
+    cloudflared tunnel --url http://localhost:4000
     ```
     *Cloudflared akan memberikan URL `.trycloudflare.com` yang bisa diakses secara global.*
 

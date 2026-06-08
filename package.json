@@ -7,6 +7,7 @@
         "dev": "tsx watch --env-file .env src/index.ts",
         "test": "tsx --env-file .env src/index.ts",
         "public": "untun tunnel",
+        "online": "concurrently \"npm run dev\" \"bore local 4000 --to bore.pub\"",
         "typecheck": "tsc --noEmit",
         "build": "tsup src/index.ts",
         "start": "node build/index.js"
@@ -27,6 +28,7 @@
     "devDependencies": {
         "@types/express": "^5.0.6",
         "@types/node": "^25.6.0",
+        "concurrently": "^10.0.3",
         "tsup": "^8.5.1",
         "tsx": "^4.21.0",
         "typescript": "^6.0.3"
