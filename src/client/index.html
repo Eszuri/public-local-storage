@@ -537,6 +537,20 @@
         </div>
     </div>
 
+    <!-- Preview Modal -->
+    <div class="modal-overlay" id="previewOverlay">
+        <div class="modal preview-modal">
+            <div class="preview-header">
+                <span class="preview-filename" id="previewFilename"></span>
+                <button class="preview-close-btn" onclick="closePreviewModal()">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <div class="preview-body" id="previewBody">
+            </div>
+        </div>
+    </div>
+
     <script>
         const API = window.location.origin;
         let currentPath = "";
