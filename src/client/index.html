@@ -573,6 +573,7 @@
 
         let activePreviewFile = null;
         const previewOverlay = document.getElementById("previewOverlay");
+        const MAX_PREVIEW_SIZE = 100 * 1024 * 1024;
 
         async function togglePreview(name) {
             if (activePreviewFile === name) {
@@ -587,6 +588,33 @@
 
             previewFilename.textContent = name;
             previewBody.innerHTML = "";
+
+            try {
+                showLoading("Checking file size...");
+                const headRes = await fetch(`${API}/files/${encodeURIComponent(targetPath)}`, { method: 'HEAD' });
+                if (!headRes.ok) throw new Error("Failed to check file");
+                const fileSize = parseInt(headRes.headers.get('Content-Length') || '0');
+                if (fileSize > MAX_PREVIEW_SIZE) {
+                    previewBody.innerHTML = `
+                        <div class="preview-unsupported">
+                            <i class="ph ph-warning"></i>
+                            <div>File too large to preview (${(fileSize / 1024 / 1024).toFixed(1)} MB)</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Maximum preview size: 100 MB</div>
+                            <button class="btn btn-primary" onclick="window.open('${API}/api/download?path=${encodeURIComponent(targetPath)}')">
+                                <i class="ph ph-download-simple"></i> Download
+                            </button>
+                        </div>`;
+                    activePreviewFile = name;
+                    previewOverlay.style.display = "flex";
+                    setTimeout(() => previewOverlay.classList.add("show"), 10);
+                    updateEyeIcons();
+                    return;
+                }
+            } catch (err) {
+                console.error("Size check failed:", err);
+            } finally {
+                hideLoading();
+            }
 
             switch (fileType) {
                 case 'image':
