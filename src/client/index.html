@@ -734,6 +734,14 @@
                     fileActions.className = "file-actions";
                     
                     if (!f.isDirectory) {
+                        const previewBtn = document.createElement("button");
+                        previewBtn.className = "icon-btn";
+                        previewBtn.setAttribute('data-preview-name', f.name);
+                        previewBtn.innerHTML = '<i class="ph ph-eye"></i>';
+                        previewBtn.title = "Preview";
+                        previewBtn.onclick = () => togglePreview(f.name);
+                        fileActions.appendChild(previewBtn);
+
                         const editBtn = document.createElement("button");
                         editBtn.className = "icon-btn edit";
                         editBtn.innerHTML = '<i class="ph ph-pencil-simple"></i>';
