@@ -571,6 +571,107 @@
             return 'text';
         }
 
+        let activePreviewFile = null;
+        const previewOverlay = document.getElementById("previewOverlay");
+
+        async function togglePreview(name) {
+            if (activePreviewFile === name) {
+                closePreviewModal();
+                return;
+            }
+
+            const targetPath = currentPath ? `${currentPath}/${name}` : name;
+            const fileType = getFileType(name);
+            const previewBody = document.getElementById("previewBody");
+            const previewFilename = document.getElementById("previewFilename");
+
+            previewFilename.textContent = name;
+            previewBody.innerHTML = "";
+
+            switch (fileType) {
+                case 'image':
+                    previewBody.innerHTML = `<img src="/files/${encodeURIComponent(targetPath)}" alt="${name}">`;
+                    break;
+                case 'video':
+                    previewBody.innerHTML = `<video controls src="/files/${encodeURIComponent(targetPath)}"></video>`;
+                    break;
+                case 'audio':
+                    previewBody.innerHTML = `<audio controls src="/files/${encodeURIComponent(targetPath)}"></audio>`;
+                    break;
+                case 'pdf':
+                    previewBody.innerHTML = `<iframe src="/files/${encodeURIComponent(targetPath)}"></iframe>`;
+                    break;
+                case 'text':
+                    try {
+                        showLoading("Loading preview...");
+                        const res = await fetch(`${API}/api/download?path=${encodeURIComponent(targetPath)}`);
+                        if (!res.ok) throw new Error("Failed to load file");
+                        const content = await res.text();
+                        const ext = name.split('.').pop().toLowerCase();
+                        const langMap = {
+                            'js': 'javascript', 'ts': 'typescript', 'py': 'python',
+                            'java': 'java', 'c': 'c', 'cpp': 'cpp', 'go': 'go',
+                            'rs': 'rust', 'sh': 'bash', 'bat': 'dos', 'ps1': 'powershell',
+                            'yaml': 'yaml', 'yml': 'yaml', 'xml': 'xml', 'sql': 'sql',
+                            'html': 'html', 'css': 'css', 'json': 'json', 'md': 'markdown'
+                        };
+                        const lang = langMap[ext] || 'plaintext';
+                        const codeEl = document.createElement('code');
+                        codeEl.className = `language-${lang}`;
+                        codeEl.textContent = content;
+                        const preEl = document.createElement('pre');
+                        preEl.appendChild(codeEl);
+                        previewBody.appendChild(preEl);
+                        hljs.highlightElement(codeEl);
+                    } catch (err) {
+                        previewBody.innerHTML = `<div class="preview-unsupported"><i class="ph ph-warning"></i><div>Failed to load file</div></div>`;
+                    } finally {
+                        hideLoading();
+                    }
+                    break;
+                default:
+                    previewBody.innerHTML = `
+                        <div class="preview-unsupported">
+                            <i class="ph ph-file"></i>
+                            <div>Preview not available</div>
+                            <button class="btn btn-primary" onclick="window.open('${API}/api/download?path=${encodeURIComponent(targetPath)}')">
+                                <i class="ph ph-download-simple"></i> Download
+                            </button>
+                        </div>`;
+            }
+
+            activePreviewFile = name;
+            previewOverlay.style.display = "flex";
+            setTimeout(() => previewOverlay.classList.add("show"), 10);
+            updateEyeIcons();
+        }
+
+        function closePreviewModal() {
+            previewOverlay.classList.remove("show");
+            setTimeout(() => {
+                previewOverlay.style.display = "none";
+                document.getElementById("previewBody").innerHTML = "";
+            }, 300);
+            activePreviewFile = null;
+            updateEyeIcons();
+        }
+
+        function updateEyeIcons() {
+            document.querySelectorAll('[data-preview-name]').forEach(btn => {
+                const name = btn.getAttribute('data-preview-name');
+                const icon = btn.querySelector('i');
+                if (activePreviewFile === name) {
+                    btn.classList.add('preview-active');
+                    icon.className = 'ph-fill ph-eye-closed';
+                    btn.title = 'Close Preview';
+                } else {
+                    btn.classList.remove('preview-active');
+                    icon.className = 'ph ph-eye';
+                    btn.title = 'Preview';
+                }
+            });
+        }
+
         const loadingOverlay = document.getElementById("loadingOverlay");
 
         function showLoading(text = "Processing...") {
