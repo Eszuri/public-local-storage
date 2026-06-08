@@ -167,6 +167,14 @@
             color: #60a5fa;
         }
 
+        .file-thumbnail {
+            width: 2rem;
+            height: 2rem;
+            object-fit: cover;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
         .file-name {
             font-size: 1rem;
             font-weight: 500;
@@ -748,12 +756,16 @@
                     const item = document.createElement("div");
                     item.className = "file-item";
 
-                    const iconClass = f.isDirectory ? "ph-fill ph-folder folder-icon" : "ph-fill ph-file-text file-icon-doc";
+                    const isImage = !f.isDirectory && getFileType(f.name) === 'image';
+                    const targetPath = currentPath ? `${currentPath}/${f.name}` : f.name;
+                    const iconHtml = isImage
+                        ? `<img class="file-thumbnail" src="/files/${encodeURIComponent(targetPath)}" alt="${f.name}">`
+                        : `<i class="${f.isDirectory ? 'ph-fill ph-folder folder-icon' : 'ph-fill ph-file-text file-icon-doc'} file-icon"></i>`;
                     
                     const fileInfo = document.createElement("div");
                     fileInfo.className = "file-info";
                     fileInfo.innerHTML = `
-                        <i class="${iconClass} file-icon"></i>
+                        ${iconHtml}
                         <span class="file-name">${f.name}</span>
                     `;
                     fileInfo.onclick = () => handleItemClick(f.name, f.isDirectory);
