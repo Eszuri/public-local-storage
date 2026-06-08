@@ -556,6 +556,21 @@
         let currentPath = "";
         let isEditing = false;
 
+        const FILE_TYPES = {
+            image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'],
+            video: ['mp4', 'webm', 'ogg', 'mov'],
+            audio: ['mp3', 'wav', 'ogg', 'flac', 'aac'],
+            pdf: ['pdf']
+        };
+
+        function getFileType(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            for (const [type, exts] of Object.entries(FILE_TYPES)) {
+                if (exts.includes(ext)) return type;
+            }
+            return 'text';
+        }
+
         const loadingOverlay = document.getElementById("loadingOverlay");
 
         function showLoading(text = "Processing...") {
