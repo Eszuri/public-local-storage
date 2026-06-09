@@ -4,7 +4,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Local Storage</title>
+    <title>Local Storage</title>
+    <script>
+        (function () {
+            const ua = navigator.userAgent.toLowerCase();
+            const plat = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
+            let name = 'Local Storage';
+            if (/android/.test(ua)) name = 'Android Storage';
+            else if (/iphone|ipad|ipod|ios/.test(ua)) name = 'iOS Storage';
+            else if (/win/.test(plat.toLowerCase()) || /windows/.test(ua)) name = 'Windows Storage';
+            else if (/mac/.test(plat.toLowerCase())) name = 'macOS Storage';
+            else if (/linux/.test(plat.toLowerCase()) || /linux/.test(ua)) name = 'Linux Storage';
+            document.title = name;
+            window.addEventListener('DOMContentLoaded', () => {
+                const el = document.getElementById('storageTitle');
+                if (el) el.textContent = name;
+            });
+        })();
+    </script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <!-- Phosphor Icons -->
@@ -501,7 +518,7 @@
         <div class="header">
             <div class="title">
                 <i class="ph-fill ph-hard-drives"></i>
-                Eszuri Storage
+                <span id="storageTitle">Local Storage</span>
             </div>
         </div>
 
