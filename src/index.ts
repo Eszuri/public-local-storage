@@ -54,11 +54,17 @@ app.get("/api/files", async (req, res) => {
     }
 
     try {
-        // Menggunakan async readdir agar tidak memblokir event loop
         const files = await fs.promises.readdir(targetPath, {withFileTypes: true});
-        const result = files.map(dirent => ({
-            name: dirent.name,
-            isDirectory: dirent.isDirectory()
+        const result = await Promise.all(files.map(async dirent => {
+            const filePath = path.join(targetPath, dirent.name);
+            const stat = await fs.promises.stat(filePath);
+            return {
+                name: dirent.name,
+                isDirectory: dirent.isDirectory(),
+                size: stat.size,
+                modifiedAt: stat.mtime.toISOString(),
+                createdAt: stat.birthtime.toISOString()
+            };
         }));
         res.json(result);
     } catch (err) {
