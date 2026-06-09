@@ -182,12 +182,6 @@
             font-weight: 500;
         }
 
-        .file-size {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-left: 0.75rem;
-        }
-
         .file-actions {
             display: flex;
             gap: 0.5rem;
@@ -409,15 +403,6 @@
             max-width: calc(80vw - 8rem);
         }
 
-        .preview-meta {
-            display: flex;
-            gap: 1.5rem;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 0.25rem;
-        }
-        }
-
         .preview-close-btn {
             background: transparent;
             border: none;
@@ -566,10 +551,7 @@
     <div class="modal-overlay" id="previewOverlay">
         <div class="modal preview-modal">
             <div class="preview-header">
-                <div>
-                    <span class="preview-filename" id="previewFilename"></span>
-                    <div class="preview-meta" id="previewMeta"></div>
-                </div>
+                <span class="preview-filename" id="previewFilename"></span>
                 <button class="preview-close-btn" onclick="closePreviewModal()">
                     <i class="ph ph-x"></i>
                 </button>
@@ -583,7 +565,6 @@
         const API = window.location.origin;
         let currentPath = "";
         let isEditing = false;
-        let loadedFiles = [];
 
         const FILE_TYPES = {
             image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'],
@@ -600,19 +581,6 @@
             return 'text';
         }
 
-        function formatSize(bytes) {
-            if (bytes === 0) return '0 B';
-            const k = 1024;
-            const sizes = ['B', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-        }
-
-        function formatDate(dateStr) {
-            const d = new Date(dateStr);
-            return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-        }
-
         let activePreviewFile = null;
         const previewOverlay = document.getElementById("previewOverlay");
         const MAX_PREVIEW_SIZE = 100 * 1024 * 1024;
@@ -627,18 +595,6 @@
             const fileType = getFileType(name);
             const previewBody = document.getElementById("previewBody");
             const previewFilename = document.getElementById("previewFilename");
-            const previewMeta = document.getElementById("previewMeta");
-
-            const fileData = loadedFiles.find(f => f.name === name);
-            if (fileData) {
-                previewMeta.innerHTML = `
-                    <span><i class="ph ph-hard-drives"></i> ${formatSize(fileData.size)}</span>
-                    <span><i class="ph ph-calendar"></i> Modified: ${formatDate(fileData.modifiedAt)}</span>
-                    <span><i class="ph ph-clock"></i> Created: ${formatDate(fileData.createdAt)}</span>
-                `;
-            } else {
-                previewMeta.innerHTML = '';
-            }
 
             previewFilename.textContent = name;
             previewBody.innerHTML = "";
@@ -757,7 +713,6 @@
                 const res = await fetch(`${API}/api/files?path=${encodeURIComponent(currentPath)}`);
                 if (!res.ok) throw new Error("Failed to fetch files");
                 const files = await res.json();
-                loadedFiles = files;
 
                 const list = document.getElementById("files");
                 list.innerHTML = "";
@@ -797,11 +752,9 @@
                     
                     const fileInfo = document.createElement("div");
                     fileInfo.className = "file-info";
-                    const sizeHtml = !f.isDirectory ? `<span class="file-size">${formatSize(f.size)}</span>` : '';
                     fileInfo.innerHTML = `
                         ${iconHtml}
                         <span class="file-name">${f.name}</span>
-                        ${sizeHtml}
                     `;
                     fileInfo.onclick = () => handleItemClick(f.name, f.isDirectory);
 
@@ -840,7 +793,7 @@
                 });
             } catch (error) {
                 console.error("Error loading files:", error);
-                alert("Failed to connect to server. Check localtunnel connection.");
+                alert("Failed to connect to server. Check bore tunnel connection.");
             } finally {
                 hideLoading();
             }

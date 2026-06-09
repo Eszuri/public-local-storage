@@ -31,7 +31,7 @@
 - `package-lock.json` is gitignored (unusual)
 - No linter or formatter configured
 - Express 5 (not 4) — handler signatures and error handling differ
-- `runtime/` contains platform-specific tunnel binaries (cloudflared) — no longer used, bore replaces all tunneling
+- Bore handles all tunneling — no other tunnel tooling exists in the project
 
 ## Verification Order
 

@@ -1,5 +1,0 @@
-download binary using termux:
-pkg install cloudflared
-
-how run:
-cloudflared tunnel --url http://localhost:3000
